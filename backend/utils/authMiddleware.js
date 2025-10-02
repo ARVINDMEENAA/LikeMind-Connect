@@ -9,8 +9,8 @@ export const authMiddleware = async (req, res, next) => {
     // Check for token in Authorization header first, then in cookies
     if (authHeader && authHeader.startsWith('Bearer ')) {
       token = authHeader.replace('Bearer ', '');
-    } else if (req.cookies && req.cookies.token) {
-      token = req.cookies.token;
+    } else if (req.cookies && req.cookies.authToken) {
+      token = req.cookies.authToken;
     }
     
     if (!token) {
