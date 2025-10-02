@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = 'https://likemind-connect-5.onrender.com';
 
 // Test user credentials (you'll need to replace with actual user credentials)
 const testUsers = [
