@@ -94,7 +94,12 @@ export const sendPasswordResetEmail = async (email, token, name) => {
     `
   };
 
+  try {
   await transporter.sendMail(mailOptions);
+} catch (err) {
+  console.error('❌ Email sendMail error:', err);
+  throw err; // so that error bubbles up as before
+}
 };
 
 // Send welcome email after first login
