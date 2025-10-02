@@ -1,7 +1,9 @@
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 import Follow from './models/Follow.js';
+dotenv.config();
 
-mongoose.connect('mongodb://localhost:27017/likemind-connect')
+mongoose.connect('process.env.MONGODB_URI')
   .then(async () => {
     console.log('Connected to MongoDB');
     const follows = await Follow.find({}).populate('follower following', 'name email');
