@@ -1,36 +1,13 @@
-import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 
-// Create transporter function for SendGrid
-const createTransporter = () => {
-  if (process.env.TESTING_MODE === 'true') {
-    return {
-      sendMail: (options) => {
-        console.log('📧 Email would be sent (TESTING MODE):');
-        console.log('To:', options.to);
-        console.log('Subject:', options.subject);
-        console.log('✅ Email sent successfully (simulated)');
-        return Promise.resolve({ messageId: 'test-' + Date.now() });
-      }
-    };
-  }
-
-  return nodemailer.createTransport({
-    service: 'SendGrid',
-    auth: {
-      user: 'apikey', // literally the string 'apikey'
-      pass: process.env.SENDGRID_API_KEY
-    }
-  });
-};
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // Send verification email
 export const sendVerificationEmail = async (email, token, name) => {
-  const transporter = createTransporter();
   const verificationUrl = `${process.env.BACKEND_URL}/api/auth/verify-email/${token}`;
-
-  const mailOptions = {
-    from: process.env.EMAIL_FROM, // Use your SendGrid verified sender email
+  const msg = {
     to: email,
+    from: process.env.EMAIL_FROM,
     subject: 'Verify Your Email Address',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -45,24 +22,21 @@ export const sendVerificationEmail = async (email, token, name) => {
       </div>
     `
   };
-
   try {
-    await transporter.sendMail(mailOptions);
+    await sgMail.send(msg);
     console.log('✅ Verification email sent successfully');
   } catch (err) {
-    console.error('❌ Nodemailer sendMail error:', err);
+    console.error('❌ SendGrid sendMail error:', err?.response?.body || err);
     throw err;
   }
 };
 
 // Send password reset email
 export const sendPasswordResetEmail = async (email, token, name) => {
-  const transporter = createTransporter();
   const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
-
-  const mailOptions = {
-    from: process.env.EMAIL_FROM,
+  const msg = {
     to: email,
+    from: process.env.EMAIL_FROM,
     subject: 'Reset Your Password',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -83,23 +57,20 @@ export const sendPasswordResetEmail = async (email, token, name) => {
       </div>
     `
   };
-
   try {
-    await transporter.sendMail(mailOptions);
+    await sgMail.send(msg);
     console.log('✅ Password reset email sent successfully');
   } catch (err) {
-    console.error('❌ Nodemailer sendMail error:', err);
+    console.error('❌ SendGrid sendMail error:', err?.response?.body || err);
     throw err;
   }
 };
 
 // Send welcome email after first login
 export const sendWelcomeEmail = async (email, name) => {
-  const transporter = createTransporter();
-
-  const mailOptions = {
-    from: process.env.EMAIL_FROM,
+  const msg = {
     to: email,
+    from: process.env.EMAIL_FROM,
     subject: '🎉 Welcome to LikeMind Connect!',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px;">
@@ -132,12 +103,11 @@ export const sendWelcomeEmail = async (email, name) => {
       </div>
     `
   };
-
   try {
-    await transporter.sendMail(mailOptions);
+    await sgMail.send(msg);
     console.log('✅ Welcome email sent successfully');
   } catch (err) {
-    console.error('❌ Nodemailer sendMail error:', err);
+    console.error('❌ SendGrid sendMail error:', err?.response?.body || err);
     throw err;
   }
 };
