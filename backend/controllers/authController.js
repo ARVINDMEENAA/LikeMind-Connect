@@ -96,8 +96,9 @@ export const signup = async (req, res) => {
     // Send verification email
     try {
       await sendVerificationEmail(trimmedEmail, verificationToken, name);
+      console.log('✅ Verification email sent successfully to:', trimmedEmail);
     } catch (emailError) {
-      console.log('Email failed:', emailError.message);
+      console.log('❌ Email failed:', emailError.message);
       // In testing mode, continue without email
       if (process.env.TESTING_MODE !== 'true') {
         await User.findByIdAndDelete(user._id);
@@ -125,6 +126,7 @@ export const signup = async (req, res) => {
 export const verifyEmail = async (req, res) => {
   try {
     const { token } = req.params;
+    console.log('📧 Verification request received for token:', token);
     
     const user = await User.findOne({
       emailVerificationToken: token,
@@ -132,20 +134,51 @@ export const verifyEmail = async (req, res) => {
     });
     
     if (!user) {
-      return res.status(400).json({ message: 'Invalid or expired verification token' });
+      console.log('❌ Invalid or expired token');
+      const errorUrl = `${process.env.FRONTEND_URL}/verify-email?status=error&message=Invalid or expired verification token`;
+      return res.send(`
+        <html>
+          <head>
+            <title>Email Verification</title>
+            <meta http-equiv="refresh" content="0; url=${errorUrl}">
+          </head>
+          <body>
+            <h2>❌ Verification Failed</h2>
+            <p>Invalid or expired token. Redirecting...</p>
+            <p>If not redirected, <a href="${errorUrl}">click here</a></p>
+          </body>
+        </html>
+      `);
     }
     
+    console.log('✅ User found, verifying email for:', user.email);
     user.isVerified = true;
     user.emailVerificationToken = undefined;
     user.emailVerificationExpires = undefined;
     
     await user.save();
+    console.log('✅ User verified successfully, redirecting to frontend');
     
-    res.json({ message: 'Email verified successfully! You can now login.' });
+    // Redirect to frontend with success status
+    const successUrl = `${process.env.FRONTEND_URL}/verify-email?status=success&message=Email verified successfully`;
+    res.redirect(successUrl);
     
   } catch (error) {
-    console.error('Verification error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('❌ Verification error:', error);
+    const errorUrl = `${process.env.FRONTEND_URL}/verify-email?status=error&message=Server error occurred`;
+    res.send(`
+      <html>
+        <head>
+          <title>Email Verification</title>
+          <meta http-equiv="refresh" content="0; url=${errorUrl}">
+        </head>
+        <body>
+          <h2>❌ Server Error</h2>
+          <p>An error occurred. Redirecting...</p>
+          <p>If not redirected, <a href="${errorUrl}">click here</a></p>
+        </body>
+      </html>
+    `);
   }
 };
 
