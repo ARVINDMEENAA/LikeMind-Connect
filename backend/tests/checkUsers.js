@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
+import dotenv from 'dotenv';
 const User = require('./models/User');
+dotenv.config(); 
 
-mongoose.connect('mongodb+srv://abdulrehman78454:abdul123@cluster0.mongodb.net/likemind?retryWrites=true&w=majority')
+mongoose.connect('process.env.MONGO_URI')
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
 
