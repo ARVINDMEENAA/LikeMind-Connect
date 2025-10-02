@@ -58,7 +58,13 @@ export const sendVerificationEmail = async (email, token, name) => {
     `
   };
 
-  await transporter.sendMail(mailOptions);
+   try {
+    await transporter.sendMail(mailOptions);
+    console.log('✅ Verification email sent successfully');
+  } catch (err) {
+    console.error('❌ Nodemailer sendMail error:', err); // <-- Yahan full error print hoga
+    throw err;
+  }
 };
 
 // Send password reset email
@@ -94,12 +100,7 @@ export const sendPasswordResetEmail = async (email, token, name) => {
     `
   };
 
-  try {
   await transporter.sendMail(mailOptions);
-} catch (err) {
-  console.error('❌ Email sendMail error:', err);
-  throw err; // so that error bubbles up as before
-}
 };
 
 // Send welcome email after first login
