@@ -35,7 +35,7 @@ const createTransporter = () => {
 // Send verification email
 export const sendVerificationEmail = async (email, token, name) => {
   const transporter = createTransporter();
-  const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
+  const verificationUrl = `${process.env.BACKEND_URL}/api/auth/verify-email/${token}`;
   
   const mailOptions = {
     from: process.env.EMAIL_USER,
