@@ -22,8 +22,13 @@ const userSchema = new mongoose.Schema({
   profile_picture: { type: String }
 }, { timestamps: true });
 
-// Password comparison method
+// Password comparison method (safe)
 userSchema.methods.comparePassword = async function(password) {
+  // Defensive check: ensure both passwords exist and are strings
+  if (!password || typeof password !== 'string' || !this.password || typeof this.password !== 'string') {
+    // Return false instead of throwing to avoid bcrypt error
+    return false;
+  }
   return bcrypt.compare(password, this.password);
 };
 
