@@ -583,3 +583,141 @@ export const getSharedHobbies = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
+// Regenerate embedding for current user
+export const regenerateEmbedding = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (!user.hobbies || user.hobbies.length === 0) {
+      return res.status(400).json({ message: 'No hobbies found to generate embedding' });
+    }
+
+    const hobbiesText = user.hobbies.join(' ');
+    const embedding = await generateEmbedding(hobbiesText);
+
+    if (embedding && embedding.length > 0) {
+      user.embedding = embedding;
+      await user.save();
+
+      // Update in Pinecone
+      if (process.env.PINECONE_API_KEY) {
+        try {
+          await upsertUserEmbedding(userId, embedding, {
+            userId: userId.toString(),
+            hobbies: user.hobbies,
+            name: user.name
+          });
+        } catch (error) {
+          console.error('Pinecone update failed:', error.message);
+        }
+      }
+
+      res.json({ message: 'Embedding regenerated successfully', embeddingLength: embedding.length });
+    } else {
+      res.status(500).json({ message: 'Failed to generate embedding' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Generate embeddings for all users who don't have them
+export const generateMissingEmbeddings = async (req, res) => {
+  try {
+    const usersWithoutEmbeddings = await User.find({
+      hobbies: { $exists: true, $ne: [] },
+      $or: [
+        { embedding: { $exists: false } },
+        { embedding: null },
+        { embedding: [] }
+      ]
+    });
+
+    let processed = 0;
+    let failed = 0;
+
+    for (const user of usersWithoutEmbeddings) {
+      try {
+        const hobbiesText = user.hobbies.join(' ');
+        const embedding = await generateEmbedding(hobbiesText);
+
+        if (embedding && embedding.length > 0) {
+          user.embedding = embedding;
+          await user.save();
+
+          // Store in Pinecone
+          if (process.env.PINECONE_API_KEY) {
+            try {
+              await upsertUserEmbedding(user._id, embedding, {
+                userId: user._id.toString(),
+                hobbies: user.hobbies,
+                name: user.name
+              });
+            } catch (error) {
+              console.error(`Pinecone failed for user ${user.name}:`, error.message);
+            }
+          }
+
+          processed++;
+          console.log(`✅ Generated embedding for ${user.name}`);
+        } else {
+          failed++;
+          console.log(`❌ Failed to generate embedding for ${user.name}`);
+        }
+      } catch (error) {
+        failed++;
+        console.error(`Error processing ${user.name}:`, error.message);
+      }
+    }
+
+    res.json({
+      message: 'Bulk embedding generation completed',
+      totalUsers: usersWithoutEmbeddings.length,
+      processed,
+      failed
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Check embedding health for all users
+export const checkEmbeddingHealth = async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    const usersWithHobbies = await User.countDocuments({ hobbies: { $exists: true, $ne: [] } });
+    const usersWithEmbeddings = await User.countDocuments({
+      embedding: { $exists: true, $ne: null, $ne: [] }
+    });
+    const usersWithBothHobbiesAndEmbeddings = await User.countDocuments({
+      hobbies: { $exists: true, $ne: [] },
+      embedding: { $exists: true, $ne: null, $ne: [] }
+    });
+
+    const missingEmbeddings = await User.find({
+      hobbies: { $exists: true, $ne: [] },
+      $or: [
+        { embedding: { $exists: false } },
+        { embedding: null },
+        { embedding: [] }
+      ]
+    }).select('name hobbies');
+
+    res.json({
+      totalUsers,
+      usersWithHobbies,
+      usersWithEmbeddings,
+      usersWithBothHobbiesAndEmbeddings,
+      embeddingCoverage: usersWithHobbies > 0 ? ((usersWithBothHobbiesAndEmbeddings / usersWithHobbies) * 100).toFixed(2) + '%' : '0%',
+      missingEmbeddings: missingEmbeddings.map(u => ({ name: u.name, hobbies: u.hobbies }))
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
