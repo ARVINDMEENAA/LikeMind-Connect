@@ -34,7 +34,6 @@ const app = express();
 app.set('trust proxy', 1);
 
 // --------- CORS FIX (HINGLISH: YAHI LAGANA HAI, BAS) ----------
-import cors from 'cors';
 
 // SABSE UPPAR, SIRF EK LINE, KOI ARRAY YA CALLBACK NAHI!
 app.use(cors({
