@@ -1,5 +1,5 @@
 import express from 'express';
-import { createProfile, updateProfile, getProfile, getRecommendations, getUserById, getSharedHobbies, testRecommendations, debugEmbeddings } from '../controllers/profileController.js';
+import { createProfile, updateProfile, getProfile, getRecommendations, getUserById, getSharedHobbies, testRecommendations, debugEmbeddings, regenerateEmbedding, generateMissingEmbeddings, checkEmbeddingHealth, testEmbeddings } from '../controllers/profileController.js';
 import { getDashboardStats } from '../controllers/followController.js';
 import { authMiddleware } from '../utils/authMiddleware.js';
 
@@ -11,6 +11,10 @@ router.put('/profile/update', authMiddleware, updateProfile);
 router.get('/recommendations', authMiddleware, getRecommendations);
 router.get('/test-recommendations', authMiddleware, testRecommendations);
 router.get('/debug-embeddings', authMiddleware, debugEmbeddings);
+router.post('/regenerate-embedding', authMiddleware, regenerateEmbedding);
+router.post('/generate-missing-embeddings', authMiddleware, generateMissingEmbeddings);
+router.get('/embedding-health', authMiddleware, checkEmbeddingHealth);
+router.get('/test-embeddings', testEmbeddings);
 router.get('/user/:id', authMiddleware, getUserById);
 router.get('/match/hobbies/:id', authMiddleware, getSharedHobbies);
 router.get('/dashboard-stats', authMiddleware, getDashboardStats);
