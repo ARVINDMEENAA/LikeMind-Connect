@@ -6,22 +6,20 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true },
   passwordHash: { type: String, required: true },
   isVerified: { type: Boolean, default: false },
-  bio: { type: String, default: '' },
-  location: { type: String, default: '' },
-  occupation: { type: String, default: '' },
-  age: { type: Number },
-  gender: { type: String, default: '' },
-  hobbies: { type: [String], default: [] },
-  profile_picture: { type: String, default: '' },
-  embedding: { type: mongoose.Schema.Types.Mixed },
-  hobbyEmbeddings: { type: Array, default: [] },
-  // ...keep the rest
   emailVerificationToken: { type: String },
   emailVerificationExpires: { type: Date },
   resetPasswordToken: { type: String },
   resetPasswordExpires: { type: Date },
   lastLogin: { type: Date },
-  isFirstLogin: { type: Boolean, default: true }
+  isFirstLogin: { type: Boolean, default: true },
+  age: { type: Number },
+  gender: { type: String },
+  bio: { type: String },
+  location: { type: String },
+  occupation: { type: String },
+  hobbies: { type: [String], default: [] },      // Array of strings
+  embedding: { type: [Number], default: [] },    // Array of numbers
+  profile_picture: { type: String }
 }, { timestamps: true });
 
 // Password comparison method
