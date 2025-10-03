@@ -32,10 +32,21 @@ console.log('🔧 Cloudinary Values Debug:', {
 
 const app = express();
 app.set('trust proxy', 1);
+
+// --- CORS SETUP (Put before any route or middleware!) ---
+const allowedOrigins = [
+  'https://likemindconnect.netlify.app',
+  // Add more origins if needed
+];
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+}));
+
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL,
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
     credentials: true
   }
@@ -57,10 +68,6 @@ app.use((req, res, next) => {
 });
 
 // Middleware
-app.use(cors({
-  origin: process.env.FRONTEND_URL,
-  credentials: true
-}));
 app.use(cookieParser());
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
