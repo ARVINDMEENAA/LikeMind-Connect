@@ -16,7 +16,6 @@ const EditProfile = () => {
   const [loading, setLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
 
-  // Load current profile data
   useEffect(() => {
     const loadProfile = async () => {
       try {
@@ -57,29 +56,27 @@ const EditProfile = () => {
   };
 
   const handleHobbiesChange = (hobbies) => {
-    console.log('Hobbies changed:', hobbies);
     setFormData(prev => ({ ...prev, hobbies }));
   };
 
   const handleSave = async () => {
     setLoading(true);
     try {
-      const profileData = {
-        name: formData.name,
-        age: formData.age,
-        bio: formData.bio,
-        location: formData.location,
-        occupation: formData.occupation,
-        hobbies: formData.hobbies,
-        profile_picture: previewImage
-      };
+      const data = new FormData();
+      data.append('name', formData.name);
+      data.append('age', formData.age);
+      data.append('bio', formData.bio);
+      data.append('location', formData.location);
+      data.append('occupation', formData.occupation);
+      data.append('hobbies', JSON.stringify(formData.hobbies));
+      if (formData.profilePicture) {
+        data.append('profile_picture', formData.profilePicture); // Image file
+      }
 
-      console.log('Sending profile data:', profileData);
-      console.log('Hobbies being sent:', formData.hobbies);
+      const response = await api.put('/profile/update', data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
 
-      const response = await api.put('/profile/update', profileData);
-      
-      // Backend sends success message, not success flag
       if (response.data.message === 'Profile updated successfully') {
         alert('Profile updated successfully!');
       } else {
@@ -100,7 +97,6 @@ const EditProfile = () => {
         </h1>
         
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          {/* Profile Picture Section */}
           <div className="text-center mb-8">
             <div className="relative inline-block">
               <div className="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center text-white text-4xl font-bold">
@@ -124,7 +120,6 @@ const EditProfile = () => {
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
-            {/* Personal Info */}
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
@@ -137,7 +132,6 @@ const EditProfile = () => {
                   placeholder="Enter your full name"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Age</label>
                 <input
@@ -151,7 +145,6 @@ const EditProfile = () => {
                   max="100"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
                   <MapPin size={16} className="mr-1" />
@@ -166,7 +159,6 @@ const EditProfile = () => {
                   placeholder="City, State"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
                   <Briefcase size={16} className="mr-1" />
@@ -182,8 +174,6 @@ const EditProfile = () => {
                 />
               </div>
             </div>
-
-            {/* Bio and Hobbies */}
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Bio</label>
@@ -196,19 +186,16 @@ const EditProfile = () => {
                   placeholder="Tell others about yourself..."
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Hobbies & Interests</label>
                 <HobbyInput 
                   hobbies={formData.hobbies} 
                   onChange={handleHobbiesChange}
                 />
-
               </div>
             </div>
           </div>
 
-          {/* Save Button */}
           <div className="mt-8 text-center">
             <button
               onClick={handleSave}
