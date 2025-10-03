@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true, lowercase: true },
-  passwordHash: { type: String, required: true },
+  password: { type: String, required: true },
   isVerified: { type: Boolean, default: false },
   emailVerificationToken: { type: String },
   emailVerificationExpires: { type: Date },
@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema({
 
 // Password comparison method
 userSchema.methods.comparePassword = async function(password) {
-  return bcrypt.compare(password, this.passwordHash);
+  return bcrypt.compare(password, this.password);
 };
 
 export default mongoose.model('User', userSchema);
