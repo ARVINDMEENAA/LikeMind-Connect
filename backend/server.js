@@ -33,15 +33,33 @@ console.log('🔧 Cloudinary Values Debug:', {
 const app = express();
 app.set('trust proxy', 1);
 
-// --- CORS SETUP (Put before any route or middleware!) ---
+// --- CORS SETUP (Sabse Upar, Koi Middleware/Route Se Pehle) ---
+app.use((req, res, next) => {
+  // Debug ke liye origin print karo
+  console.log("Request Origin:", req.headers.origin);
+  next();
+});
+
+// Yeh sab allowed origins ke liye hai (sirf Netlify ka exact URL likh)
 const allowedOrigins = [
-  'https://likemindconnect.netlify.app',
-  // Add more origins if needed
+  'https://likemindconnect.netlify.app'
 ];
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true,
-}));
+
+// CORS middleware sabse upar lagao
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl, etc.)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
+    credentials: true,
+  })
+);
 
 const server = createServer(app);
 const io = new Server(server, {
