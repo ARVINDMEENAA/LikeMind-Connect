@@ -1,3 +1,15 @@
+import User from '../models/User.js';
+
+// Example: createProfile function
+export const createProfile = async (req, res) => {
+  try {
+    // Apna logic yahan likho
+    res.json({ message: 'Profile created successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
 export const updateProfile = async (req, res) => {
   try {
     const { name, age, bio, location, occupation, gender } = req.body;
@@ -31,4 +43,29 @@ export const updateProfile = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
+};
+
+// Baaki functions bhi aise hi likho, example:
+export const getProfile = async (req, res) => {
+  // ...function code
+};
+
+export const getRecommendations = async (req, res) => {
+  // ...function code
+};
+
+export const getUserById = async (req, res) => {
+  // ...function code
+};
+
+export const getSharedHobbies = async (req, res) => {
+  // ...function code
+};
+
+export const testRecommendations = async (req, res) => {
+  // ...function code
+};
+
+export const debugEmbeddings = async (req, res) => {
+  // ...function code
 };
