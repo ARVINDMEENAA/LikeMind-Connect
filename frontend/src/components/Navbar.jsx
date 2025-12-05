@@ -148,7 +148,7 @@ const Navbar = () => {
                 <Sparkles className="text-white" size={20} />
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-[#3E5F44] to-[#5E936C] bg-clip-text text-transparent">
-                LikeMinds AI
+                LikeMinds Connect
               </span>
             </Link>
           </div>
