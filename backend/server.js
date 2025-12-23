@@ -37,7 +37,7 @@ app.set('trust proxy', 1);
 
 // SABSE UPPAR, SIRF EK LINE, KOI ARRAY YA CALLBACK NAHI!
 app.use(cors({
-  origin: 'https://likemindconnect.netlify.app',
+  origin: 'https://like-mind-connect.vercel.app/',
   credentials: true
 }));
 // --------------------------------------------------------------
