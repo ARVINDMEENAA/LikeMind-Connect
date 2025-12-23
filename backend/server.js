@@ -37,7 +37,7 @@ app.set('trust proxy', 1);
 
 // SABSE UPPAR, SIRF EK LINE, KOI ARRAY YA CALLBACK NAHI!
 app.use(cors({
-  origin: 'https://like-mind-connect.vercel.app/',
+  origin: true,
   credentials: true
 }));
 // --------------------------------------------------------------
@@ -47,7 +47,7 @@ app.use(cors({
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: 'https://like-mind-connect.vercel.app/',
+    origin: true,
     methods: ["GET", "POST"],
     credentials: true
   }
