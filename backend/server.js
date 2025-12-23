@@ -47,7 +47,7 @@ app.use(cors({
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: 'https://likemindconnect.netlify.app',
+    origin: 'https://like-mind-connect.vercel.app/',
     methods: ["GET", "POST"],
     credentials: true
   }
